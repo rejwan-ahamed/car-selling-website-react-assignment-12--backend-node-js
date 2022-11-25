@@ -40,11 +40,20 @@ async function run() {
       .db("CarCategory")
       .collection("CategoryData");
 
-      // user booking collection
-      const userBookingCollection = client
+    // user booking collection
+    const userBookingCollection = client
       .db("UserBooking")
       .collection("BookingData");
 
+    // user product report
+    const userProductReportCollection = client
+      .db("UserReport")
+      .collection("ReportData");
+
+      // product ads collection
+      const productAdsCollection = client
+      .db("ProductAdd")
+      .collection("ProductAddCollection");
 
     app.post("/userRegister", async (req, res) => {
       const userData = req.body;
@@ -154,11 +163,34 @@ async function run() {
     });
 
     // user booking
-    app.post('/userBooking', async(req,res)=>{
+    app.post("/userBooking", async (req, res) => {
       const bookingData = req.body;
       const result = await userBookingCollection.insertOne(bookingData);
       res.send(result);
-    })
+    });
+
+    // get user booking data by email
+    app.get("/userBookingData/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { buyerEmail: email };
+      const result = await userBookingCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // product report
+    app.post("/report", async (req, res) => {
+      const reportBody = req.body;
+      const result = await userProductReportCollection.insertOne(reportBody);
+      res.send(result);
+    });
+
+    // product ADS
+    app.post("/productADS", async (req, res) => {
+      const ADSdata = req.body;
+      const result = await productAdsCollection.insertOne(ADSdata);
+      res.send(result);
+    });
   } finally {
   }
 }
