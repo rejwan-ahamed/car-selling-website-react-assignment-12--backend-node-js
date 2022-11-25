@@ -4,7 +4,7 @@ const cors = require("cors");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // middle ware
 app.use(cors());
@@ -30,9 +30,14 @@ async function run() {
       .db("UserRegisterData")
       .collection("RegisterData");
 
+    //   products data collections
+    const productsDataCollection = client
+      .db("productData")
+      .collection("productCollection");
+
     app.post("/userRegister", async (req, res) => {
       const userData = req.body;
-      console.log(userData);
+      //   console.log(userData);
       const result = await userLoginCollection.insertOne(userData);
       res.send(result);
     });
@@ -40,7 +45,7 @@ async function run() {
     // social media login
     app.get("/socialLogin/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      //   console.log(email);
       const query = { email: email };
       const curser = userLoginCollection.find(query);
       const result = await curser.toArray();
@@ -53,11 +58,46 @@ async function run() {
         name: email,
         accountType: "Buyer",
       };
-      console.log(email)
+      //   console.log(email)
       const createUser = await userLoginCollection.insertOne(newUser);
       res.send(createUser);
-      console.log(createUser);
+      //   console.log(createUser);
     });
+
+    // user data
+    app.get("/userData/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const curser = userLoginCollection.find(query);
+      const result = await curser.toArray();
+      res.send(result);
+    });
+
+    // save products data
+    app.post("/products", async (req, res) => {
+      const productsData = req.body;
+      const result = await productsDataCollection.insertOne(productsData);
+      res.send(result);
+    });
+
+    // get products data
+    app.get("/productsData/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { seller: email };
+      const curser = productsDataCollection.find(query);
+      const result = await curser.toArray();
+      res.send(result);
+    });
+
+        // deleting user data
+        app.delete("/productDelete/:id", async (req, res) => {
+            const ID = req.params.id;
+            console.log(ID)
+            const query = { _id: ObjectId(ID) };
+            const deleteUser = await productsDataCollection.deleteOne(query);
+            res.send(deleteUser);
+          });
+
   } finally {
   }
 }
