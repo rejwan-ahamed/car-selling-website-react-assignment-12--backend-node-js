@@ -108,12 +108,13 @@ async function run() {
       const data = await carCategoryCollection.find().toArray();
       res.send(data);
     });
-    // getting car my model
+    // getting car by model
     // Porsche
     app.get("/CarCategory", async (req, res) => {
       const queryData = req.query.model;
       if (queryData == null) {
-        const data = await carCategoryCollection.find().toArray();
+        const query = { model: 'Porsche' };
+        const data = await carCategoryCollection.find(query).toArray();
         return res.send(data);
       }
 
@@ -121,9 +122,20 @@ async function run() {
       const curser = carCategoryCollection.find(query);
       const result = await curser.toArray();
       res.send(result);
+    });
 
-      // const data = await carCategoryCollection.find().toArray();
-      // res.send(data);
+    app.get("/allCars", async (req, res) => {
+      const queryData = req.query.model;
+      if (queryData == null) {
+        const query = { carType: 'Porsche' };
+        const data = await productsDataCollection.find(query).toArray();
+        return res.send(data);
+      }
+
+      const query = { carType: queryData };
+      const curser = productsDataCollection.find(query);
+      const result = await curser.toArray();
+      res.send(result);
     });
   } finally {
   }
