@@ -30,11 +30,33 @@ async function run() {
       .db("UserRegisterData")
       .collection("RegisterData");
 
-    app.post("/userRegister", (req, res) => {
+    app.post("/userRegister", async (req, res) => {
       const userData = req.body;
-      console.log(userData)
-      const result = userLoginCollection.insertOne(userData);
+      console.log(userData);
+      const result = await userLoginCollection.insertOne(userData);
       res.send(result);
+    });
+
+    // social media login
+    app.get("/socialLogin/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const curser = userLoginCollection.find(query);
+      const result = await curser.toArray();
+      const arraysLength = result;
+      if (arraysLength.length > 0) {
+        return res.send("old user");
+      }
+      const newUser = {
+        email: email,
+        name: email,
+        accountType: "Buyer",
+      };
+      console.log(email)
+      const createUser = await userLoginCollection.insertOne(newUser);
+      res.send(createUser);
+      console.log(createUser);
     });
   } finally {
   }
