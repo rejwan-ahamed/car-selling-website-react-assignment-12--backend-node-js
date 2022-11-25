@@ -40,6 +40,12 @@ async function run() {
       .db("CarCategory")
       .collection("CategoryData");
 
+      // user booking collection
+      const userBookingCollection = client
+      .db("UserBooking")
+      .collection("BookingData");
+
+
     app.post("/userRegister", async (req, res) => {
       const userData = req.body;
       //   console.log(userData);
@@ -113,7 +119,7 @@ async function run() {
     app.get("/CarCategory", async (req, res) => {
       const queryData = req.query.model;
       if (queryData == null) {
-        const query = { model: 'Porsche' };
+        const query = { model: "Porsche" };
         const data = await carCategoryCollection.find(query).toArray();
         return res.send(data);
       }
@@ -124,10 +130,11 @@ async function run() {
       res.send(result);
     });
 
+    // get all cars
     app.get("/allCars", async (req, res) => {
       const queryData = req.query.model;
       if (queryData == null) {
-        const query = { carType: 'Porsche' };
+        const query = { carType: "Porsche" };
         const data = await productsDataCollection.find(query).toArray();
         return res.send(data);
       }
@@ -137,6 +144,21 @@ async function run() {
       const result = await curser.toArray();
       res.send(result);
     });
+
+    // get single products
+    app.get("/singleProduct/:id", async (req, res) => {
+      const ID = req.params.id;
+      const query = { _id: ObjectId(ID) };
+      const result = await productsDataCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // user booking
+    app.post('/userBooking', async(req,res)=>{
+      const bookingData = req.body;
+      const result = await userBookingCollection.insertOne(bookingData);
+      res.send(result);
+    })
   } finally {
   }
 }
