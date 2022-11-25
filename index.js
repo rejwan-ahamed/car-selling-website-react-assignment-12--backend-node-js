@@ -50,8 +50,8 @@ async function run() {
       .db("UserReport")
       .collection("ReportData");
 
-      // product ads collection
-      const productAdsCollection = client
+    // product ads collection
+    const productAdsCollection = client
       .db("ProductAdd")
       .collection("ProductAddCollection");
 
@@ -190,6 +190,14 @@ async function run() {
       const ADSdata = req.body;
       const result = await productAdsCollection.insertOne(ADSdata);
       res.send(result);
+    });
+
+    // get all product ADS
+    app.get("/getAllProductADS", async (req, res) => {
+      const sort = { time: -1 };
+      const limit = 4;
+      const data = await productAdsCollection.find().sort(sort).limit(limit).toArray();
+      res.send(data);
     });
   } finally {
   }
