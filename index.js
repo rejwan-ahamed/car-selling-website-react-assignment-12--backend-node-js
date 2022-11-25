@@ -35,6 +35,11 @@ async function run() {
       .db("productData")
       .collection("productCollection");
 
+    // car category collections
+    const carCategoryCollection = client
+      .db("CarCategory")
+      .collection("CategoryData");
+
     app.post("/userRegister", async (req, res) => {
       const userData = req.body;
       //   console.log(userData);
@@ -89,15 +94,37 @@ async function run() {
       res.send(result);
     });
 
-        // deleting user data
-        app.delete("/productDelete/:id", async (req, res) => {
-            const ID = req.params.id;
-            console.log(ID)
-            const query = { _id: ObjectId(ID) };
-            const deleteUser = await productsDataCollection.deleteOne(query);
-            res.send(deleteUser);
-          });
+    // deleting user data
+    app.delete("/productDelete/:id", async (req, res) => {
+      const ID = req.params.id;
+      console.log(ID);
+      const query = { _id: ObjectId(ID) };
+      const deleteUser = await productsDataCollection.deleteOne(query);
+      res.send(deleteUser);
+    });
 
+    // get car category
+    app.get("/allCarCategory", async (req, res) => {
+      const data = await carCategoryCollection.find().toArray();
+      res.send(data);
+    });
+    // getting car my model
+    // Porsche
+    app.get("/CarCategory", async (req, res) => {
+      const queryData = req.query.model;
+      if (queryData == null) {
+        const data = await carCategoryCollection.find().toArray();
+        return res.send(data);
+      }
+
+      const query = { model: queryData };
+      const curser = carCategoryCollection.find(query);
+      const result = await curser.toArray();
+      res.send(result);
+
+      // const data = await carCategoryCollection.find().toArray();
+      // res.send(data);
+    });
   } finally {
   }
 }
