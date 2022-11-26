@@ -185,6 +185,14 @@ async function run() {
       res.send(result);
     });
 
+    // get report
+    app.get("/allReport", async (req, res) => {
+      const sort = { ReportTime : -1 };
+      const query = {};
+      const data = await userProductReportCollection.find(query).sort(sort).toArray();
+      return res.send(data);
+    });
+
     // product ADS
     app.post("/productADS", async (req, res) => {
       const ADSdata = req.body;
@@ -196,8 +204,21 @@ async function run() {
     app.get("/getAllProductADS", async (req, res) => {
       const sort = { time: -1 };
       const limit = 4;
-      const data = await productAdsCollection.find().sort(sort).limit(limit).toArray();
+      const data = await productAdsCollection
+        .find()
+        .sort(sort)
+        .limit(limit)
+        .toArray();
       res.send(data);
+    });
+
+    // get all sellers
+    app.get("/allSellers", async (req, res) => {
+      const queryData = req.query.accountType;
+      const query = { accountType: queryData };
+      const curser = userLoginCollection.find(query);
+      const result = await curser.toArray();
+      res.send(result);
     });
   } finally {
   }
