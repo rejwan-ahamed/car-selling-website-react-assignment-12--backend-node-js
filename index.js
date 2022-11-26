@@ -62,6 +62,12 @@ async function run() {
       res.send(result);
     });
 
+    // getting all user data
+    app.get("/allUserData", async (req, res) => {
+      const result = await userLoginCollection.find().toArray();
+      res.send(result);
+    });
+
     // social media login
     app.get("/socialLogin/:email", async (req, res) => {
       const email = req.params.email;
@@ -90,6 +96,33 @@ async function run() {
       const query = { email: email };
       const curser = userLoginCollection.find(query);
       const result = await curser.toArray();
+      res.send(result);
+    });
+
+    // verify user
+    app.post("/verifyUser/:id", (req, res) => {
+      const userID = req.params.id;
+      const user = req.body;
+      console.log(userID, user);
+    });
+
+    app.put("/verifyUser/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const userData = req.body;
+      const option = { upsert: true };
+
+      const updateUser = {
+        $set: {
+          verifyStatus: userData.verifyStatus,
+        },
+      };
+      console.log(userData);
+      const result = await userLoginCollection.updateOne(
+        query,
+        updateUser,
+        option
+      );
       res.send(result);
     });
 
@@ -187,9 +220,12 @@ async function run() {
 
     // get report
     app.get("/allReport", async (req, res) => {
-      const sort = { ReportTime : -1 };
+      const sort = { ReportTime: -1 };
       const query = {};
-      const data = await userProductReportCollection.find(query).sort(sort).toArray();
+      const data = await userProductReportCollection
+        .find(query)
+        .sort(sort)
+        .toArray();
       return res.send(data);
     });
 
