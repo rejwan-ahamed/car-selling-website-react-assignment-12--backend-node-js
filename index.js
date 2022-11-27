@@ -77,7 +77,7 @@ async function run() {
       const result = await curser.toArray();
       const arraysLength = result;
       if (arraysLength.length > 0) {
-        return res.send("old user");
+        return res.send({ accountType: "Buyer" });
       }
       const newUser = {
         email: email,
@@ -103,7 +103,7 @@ async function run() {
     app.post("/verifyUser/:id", (req, res) => {
       const userID = req.params.id;
       const user = req.body;
-      console.log(userID, user);
+      // console.log(userID, user);
     });
 
     app.put("/verifyUser/:id", async (req, res) => {
@@ -117,7 +117,7 @@ async function run() {
           verifyStatus: userData.verifyStatus,
         },
       };
-      console.log(userData);
+      // console.log(userData);
       const result = await userLoginCollection.updateOne(
         query,
         updateUser,
@@ -145,9 +145,28 @@ async function run() {
     // deleting user data
     app.delete("/productDelete/:id", async (req, res) => {
       const ID = req.params.id;
-      console.log(ID);
+      // console.log(ID);
       const query = { _id: ObjectId(ID) };
       const deleteUser = await productsDataCollection.deleteOne(query);
+      res.send(deleteUser);
+    });
+
+    // deleting ADS data
+    app.delete("/adsDelete/:id", async (req, res) => {
+      const ID = req.params.id;
+      // console.log(ID);
+      const query = { productID: ID };
+      const deleteUser = await productAdsCollection.deleteMany(query);
+      res.send(deleteUser);
+    });
+
+    // deleting product from user booking
+
+    app.delete("/SellerUserBookingDelete/:id", async (req, res) => {
+      const ID = req.params.id;
+      // console.log(ID);
+      const query = { productID: ID };
+      const deleteUser = await userBookingCollection.deleteMany(query);
       res.send(deleteUser);
     });
 
@@ -205,9 +224,39 @@ async function run() {
     // get user booking data by email
     app.get("/userBookingData/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       const query = { buyerEmail: email };
       const result = await userBookingCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get user order by product ID
+    app.get("/userBookingDataByProductID/:id", async (req, res) => {
+      const ID = req.params.id;
+      // console.log(ID);
+      const query = { productID: ID };
+      const result = await userBookingCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // update user payment status
+    app.put("/updateUserPaymentStatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { productID: id };
+      const userData = req.body;
+      const option = { upsert: true };
+
+      const updateUser = {
+        $set: {
+          paymentStatus: userData.paymentStatus,
+        },
+      };
+      console.log(userData);
+      const result = await userBookingCollection.updateMany(
+        query,
+        updateUser,
+        option
+      );
       res.send(result);
     });
 
@@ -255,6 +304,63 @@ async function run() {
       const curser = userLoginCollection.find(query);
       const result = await curser.toArray();
       res.send(result);
+    });
+
+    // admin seller delete
+    app.delete("/sellerDelete/:email", async (req, res) => {
+      const email = req.params.email;
+      // console.log(email);
+      const query = { email: email };
+      const deleteUser = await userLoginCollection.deleteOne(query);
+      res.send(deleteUser);
+    });
+
+    // product report delete
+    app.delete("/reportDelete/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const query = { _id: ObjectId(id) };
+      const deleteUser = await userProductReportCollection.deleteOne(query);
+      res.send(deleteUser);
+    });
+
+    // checking admin sate
+    app.get("/adminState/:email", async (req, res) => {
+      console.log(req.params.email);
+      const query = { email: req.params.email };
+      const curser = await userLoginCollection.findOne(query);
+      if (curser?.accountType === "Admin") {
+        console.log("admin");
+        return res.send(true);
+      }
+      console.log("not admin");
+      res.send(false);
+    });
+
+    // checking buyer sate
+    app.get("/buyerState/:email", async (req, res) => {
+      console.log(req.params.email);
+      const query = { email: req.params.email };
+      const curser = await userLoginCollection.findOne(query);
+      if (curser?.accountType === "Buyer") {
+        console.log("buyer");
+        return res.send(true);
+      }
+      console.log("not buyer");
+      res.send(false);
+    });
+
+    // checking seller sate
+    app.get("/sellerState/:email", async (req, res) => {
+      console.log(req.params.email);
+      const query = { email: req.params.email };
+      const curser = await userLoginCollection.findOne(query);
+      if (curser?.accountType === "Seller") {
+        console.log("Seller");
+        return res.send(true);
+      }
+      console.log("not Seller");
+      res.send(false);
     });
   } finally {
   }
