@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -22,6 +23,21 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+// jwt verify
+function jwtVerify(req, res, next) {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(401).send({ message: "Unauthorized access" });
+    }
+    req.key = decoded;
+    next();
+  });
+}
 
 async function run() {
   try {
@@ -134,7 +150,14 @@ async function run() {
     });
 
     // get products data
-    app.get("/productsData/:email", async (req, res) => {
+    app.get("/productsData/:email", jwtVerify, async (req, res) => {
+      const secret = req.key;
+      console.log(secret);
+      const UserEmail = req.params.email;
+      if (UserEmail !== secret.email) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+
       const email = req.params.email;
       const query = { seller: email };
       const curser = productsDataCollection.find(query);
@@ -222,7 +245,13 @@ async function run() {
     });
 
     // get user booking data by email
-    app.get("/userBookingData/:email", async (req, res) => {
+    app.get("/userBookingData/:email", jwtVerify, async (req, res) => {
+      const secret = req.key;
+      console.log(secret);
+      const UserEmail = req.params.email;
+      if (UserEmail !== secret.email) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
       const email = req.params.email;
       // console.log(email);
       const query = { buyerEmail: email };
@@ -361,6 +390,16 @@ async function run() {
       }
       console.log("not Seller");
       res.send(false);
+    });
+
+    // jwt token
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      console.log(user);
+      var token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
     });
   } finally {
   }
