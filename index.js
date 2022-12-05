@@ -116,14 +116,10 @@ async function run() {
     });
 
     // verify user
-    app.post("/verifyUser/:id", (req, res) => {
-      const userID = req.params.id;
-      const user = req.body;
-      // console.log(userID, user);
-    });
 
     app.put("/verifyUser/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const query = { _id: ObjectId(id) };
       const userData = req.body;
       const option = { upsert: true };
@@ -298,7 +294,7 @@ async function run() {
 
     // get report
     app.get("/allReport", async (req, res) => {
-      const sort = { ReportTime: -1 };
+      const sort = { ReportTime: 1 };
       const query = {};
       const data = await userProductReportCollection
         .find(query)
@@ -316,7 +312,7 @@ async function run() {
 
     // get all product ADS
     app.get("/getAllProductADS", async (req, res) => {
-      const sort = { time: -1 };
+      const sort = { time: 1 };
       const limit = 4;
       const data = await productAdsCollection
         .find()
